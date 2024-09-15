@@ -1,0 +1,9 @@
+{
+    "server": {
+        "port": 8084
+    },
+    "database": {
+        "username": "admin",
+        "password": "changeme"
+    }
+}
