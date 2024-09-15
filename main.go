@@ -9,7 +9,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/raphael-p/brendan/config"
-	"github.com/raphael-p/brendan/utils"
+	"github.com/raphael-p/gocommon"
 )
 
 // define app middleware
@@ -31,7 +31,7 @@ func logger(next http.Handler) http.Handler {
 		start := time.Now()
 		next.ServeHTTP(ww, r)
 		duration := time.Since(start).Milliseconds()
-		utils.LogInfo(fmt.Sprintf(
+		gocommon.LogInfo(fmt.Sprintf(
 			"%s %v from %v -> %d (%dms)",
 			r.Method, r.URL, r.RemoteAddr, ww.Status(), duration,
 		))
@@ -40,12 +40,15 @@ func logger(next http.Handler) http.Handler {
 
 // define app
 func main() {
-	utils.InitLogger()
-	defer utils.CloseLogger()
-	config.InitialiseConfig()
+	workingDir := gocommon.GetExecDirectory("brendan")
+	if workingDir == "" {
+		workingDir = "."
+	}
+	gocommon.InitLogger(workingDir)
+	defer gocommon.CloseLogger()
+	gocommon.InitialiseConfig(workingDir, config.Envars.ConfigFilepath, config.Config)
 
 	r := chi.NewRouter()
-
 	r.Use(middleware.RequestID)
 	r.Use(logger)
 	r.Use(middleware.Recoverer)
@@ -61,7 +64,7 @@ func main() {
 		r.Use(allowLocal)
 
 		r.Get("/private", func(w http.ResponseWriter, r *http.Request) {
-			utils.LogTrace(fmt.Sprint("port: ", config.Config.Server.Port))
+			gocommon.LogTrace(fmt.Sprint("port: ", config.Config.Server.Port))
 			w.Write([]byte("hello world"))
 		})
 

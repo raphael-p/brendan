@@ -1,9 +1,9 @@
 package config
 
 type envarType struct {
-	configFilepath string
+	ConfigFilepath string
 }
 
-var envars envarType = envarType{
-	configFilepath: "BRENDAN_CONFIG_FILEPATH",
+var Envars envarType = envarType{
+	ConfigFilepath: "BRENDAN_CONFIG_FILEPATH",
 }
