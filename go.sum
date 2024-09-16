@@ -1,4 +1,4 @@
 github.com/go-chi/chi/v5 v5.1.0 h1:acVI1TYaD+hhedDJ3r54HyA6sExp3HfXq7QWEEY/xMw=
 github.com/go-chi/chi/v5 v5.1.0/go.mod h1:DslCQbL2OYiznFReuXYUmQ2hGd1aDpCnlMNITLSKoi8=
-github.com/raphael-p/gocommon v0.0.1 h1:SJhNOA3n/amclmskEr80jywnUaUntdUp+DrB+eTkolE=
-github.com/raphael-p/gocommon v0.0.1/go.mod h1:PvCOEzAqc/MVc1lYtia5GfJ3NwydqXj3GBQr8DSTXMk=
+github.com/raphael-p/gocommon v0.0.4 h1:HEXrrbBQGfmwAtwnAgmP9YqwijYAZ3SdrDyrPl0kN4o=
+github.com/raphael-p/gocommon v0.0.4/go.mod h1:PvCOEzAqc/MVc1lYtia5GfJ3NwydqXj3GBQr8DSTXMk=

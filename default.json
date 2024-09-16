@@ -4,6 +4,6 @@
     },
     "database": {
         "username": "admin",
-        "password": "changeme"
+        "password": ""
     }
 }

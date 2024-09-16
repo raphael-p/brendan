@@ -3,13 +3,16 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/raphael-p/brendan/config"
-	"github.com/raphael-p/gocommon"
+	configparser "github.com/raphael-p/gocommon/config"
+	"github.com/raphael-p/gocommon/logger"
 )
 
 // define app middleware
@@ -25,13 +28,13 @@ func allowLocal(next http.Handler) http.Handler {
 	return http.HandlerFunc(fn)
 }
 
-func logger(next http.Handler) http.Handler {
+func logRequest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
 		start := time.Now()
 		next.ServeHTTP(ww, r)
 		duration := time.Since(start).Milliseconds()
-		gocommon.LogInfo(fmt.Sprintf(
+		logger.Info(fmt.Sprintf(
 			"%s %v from %v -> %d (%dms)",
 			r.Method, r.URL, r.RemoteAddr, ww.Status(), duration,
 		))
@@ -40,17 +43,25 @@ func logger(next http.Handler) http.Handler {
 
 // define app
 func main() {
-	workingDir := gocommon.GetExecDirectory("brendan")
-	if workingDir == "" {
+	// get working directory to be used to locate config and log files
+	var workingDir string
+	if os.Args[0] == "brendan" {
+		ex, err := os.Executable()
+		if err != nil {
+			panic(fmt.Sprintf("failed to locate executable: %s", err))
+		}
+		workingDir = filepath.Dir(ex)
+	} else {
 		workingDir = "."
 	}
-	gocommon.InitLogger(workingDir)
-	defer gocommon.CloseLogger()
-	gocommon.InitialiseConfig(workingDir, config.Envars.ConfigFilepath, config.Config)
+
+	logger.Create(workingDir)
+	defer logger.Close()
+	configparser.Parse(workingDir, config.Envars.ConfigFilepath, config.Values, false)
 
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
-	r.Use(logger)
+	r.Use(logRequest)
 	r.Use(middleware.Recoverer)
 
 	// web endpoint
@@ -64,11 +75,11 @@ func main() {
 		r.Use(allowLocal)
 
 		r.Get("/private", func(w http.ResponseWriter, r *http.Request) {
-			gocommon.LogTrace(fmt.Sprint("port: ", config.Config.Server.Port))
+			logger.Trace(fmt.Sprint("port: ", config.Values.Server.Port))
 			w.Write([]byte("hello world"))
 		})
 
 	})
 
-	http.ListenAndServe(fmt.Sprint(":", config.Config.Server.Port), r)
+	http.ListenAndServe(fmt.Sprint(":", config.Values.Server.Port), r)
 }
